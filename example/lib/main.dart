@@ -5,6 +5,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:save_us_galaxy/galaxy.dart';
+import 'package:save_us_galaxy/galaxy_platform_interface.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,7 +49,32 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _platformVersion = platformVersion;
     });
-    await startScan();
+    // await startScan();
+
+    // TODO Galaxy Health Connect API
+    connectHealthAPI();
+  }
+
+  connectHealthAPI() async {
+    var status = await GalaxyPlatform.instance.getSdkStatus();
+
+    if (kDebugMode) {
+      print('getSdkStatus:: $status');
+    }
+    if (status == 2) {
+      await _openHealthConnect();
+    }
+  }
+
+  Future _openHealthConnect() async {
+    final uri = Uri.parse(
+        "market://details?id=com.google.android.apps.healthdata&url=healthconnect%3A%2F%2Fonboarding");
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch $uri';
+    }
   }
 
   Future<void> startScan() async {
@@ -111,7 +138,7 @@ class _MyAppState extends State<MyApp> {
         devices.add(r.device);
       }
     });
-    final duration = Duration(seconds: 9);
+    const duration = Duration(seconds: 9);
 
     while (repeat) {
       await FlutterBluePlus.startScan(timeout: duration, withMsd: [

@@ -9,6 +9,11 @@ class MockGalaxyPlatform
     implements GalaxyPlatform {
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<int?> getSdkStatus() {
+    return Future.value(1);
+  }
 }
 
 void main() {
